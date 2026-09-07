@@ -33,13 +33,14 @@ pieces connect*.
 Run all commands from this folder. We'll start the three pieces one by one, the
 hard way, so you can see exactly what Docker Compose does for you later.
 
-### Step 1: Create a network
+### Step 1: Create a network and volume
 
-Containers can only find each other by name if they're on the **same network**.
+Containers can only find each other by name if they're on the **same network**. and we can mount the volume to the containers.
 So first we make one:
 
 ```bash
 docker network create devboard-net
+docker volume create devboard-volume
 ```
 
 ### Step 2: Build the images
