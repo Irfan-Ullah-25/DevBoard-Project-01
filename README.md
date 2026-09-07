@@ -78,7 +78,7 @@ reach the database with `POSTGRES_URL` — notice it uses the name `postgres`.
 
 ```bash
 docker run -d --name backend --network devboard-net \
-  -e PORT=8080 \
+  -e PORT=5000 \
   -e POSTGRES_URL="postgres://devboard:devboard@postgres:5432/devboard?sslmode=disable" \
   -p 8081:8080 \
   devboard-backend
@@ -86,12 +86,12 @@ docker run -d --name backend --network devboard-net \
 
 ### Step 5: Run the frontend
 
-It serves the app on port 4173 inside the container; we map it to 8080 on your
+It serves the app on port 5000 inside the container; we map it to 5000 on your
 machine.
 
 ```bash
 docker run -d --name frontend --network devboard-net \
-  -p 8080:4173 \
+  -p 5000:5000 \
   devboard-frontend
 ```
 
@@ -104,8 +104,8 @@ first load, the backend is still starting up — just refresh.)
 Then check the wiring from the terminal:
 
 ```bash
-curl http://localhost:8081/health                      # backend says OK
-curl "http://localhost:8080/api/tasks?project_id=1"    # app → backend → database
+curl http://localhost:5000/health                      # backend says OK
+curl "http://localhost:5000/api/tasks?project_id=1"    # app → backend → database
 ```
 
 ### Step 7: Stop and clean up
@@ -146,7 +146,7 @@ docker compose up --build
 ```
 
 The first build can take a few minutes. When it's done, open
-**http://localhost:8080** in your browser.
+**http://localhost** in your browser.
 
 Stop it:
 
@@ -156,8 +156,8 @@ docker compose down
 
 | Piece    | Open in browser / curl        | Notes                                   |
 | -------- | ----------------------------- | --------------------------------------- |
-| Frontend | http://localhost:8080         | the app; forwards `/api` to the backend |
-| Backend  | http://localhost:8081/health  | the Go API (the app uses it via `/api`) |
+| Frontend | http://localhost              | the app; forwards `/api` to the backend |
+| Backend  | http://localhost:5000/health  | the Go API (the app uses it via `/api`) |
 | Postgres | localhost:5432                | user / password: `devboard` / `devboard`|
 
 ---
