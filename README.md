@@ -64,9 +64,10 @@ We name it `postgres`. The backend will look for it by that exact name. The
 
 ```bash
 docker run -d --name postgres --network devboard-net \
-  -e POSTGRES_USER=devboard \
-  -e POSTGRES_PASSWORD=devboard \
+  -e POSTGRES_USER=irfan \
+  -e POSTGRES_PASSWORD=password \
   -e POSTGRES_DB=devboard \
+  -v devboard-volume:/var/lib/postgresql/data \
   -v "$PWD/init/postgres":/docker-entrypoint-initdb.d:ro \
   -p 5432:5432 \
   postgres:16-alpine
@@ -80,19 +81,19 @@ reach the database with `POSTGRES_URL` — notice it uses the name `postgres`.
 ```bash
 docker run -d --name backend --network devboard-net \
   -e PORT=5000 \
-  -e POSTGRES_URL="postgres://devboard:devboard@postgres:5432/devboard?sslmode=disable" \
-  -p 8081:8080 \
+  -e POSTGRES_URL="postgres://irfan:password@postgres:5432/devboard?sslmode=disable" \
+  -p 5001:5000 \
   devboard-backend
 ```
 
 ### Step 5: Run the frontend
 
-It serves the app on port 5000 inside the container; we map it to 5000 on your
+It serves the app on port 80 inside the container; we map it to 80 on your
 machine.
 
 ```bash
 docker run -d --name frontend --network devboard-net \
-  -p 5000:5000 \
+  -p 80:80 \
   devboard-frontend
 ```
 
@@ -105,8 +106,8 @@ first load, the backend is still starting up — just refresh.)
 Then check the wiring from the terminal:
 
 ```bash
-curl http://localhost:5000/health                      # backend says OK
-curl "http://localhost:5000/api/tasks?project_id=1"    # app → backend → database
+curl http://localhost:5001/health                      # backend says OK
+curl "http://localhost:5001/api/tasks?project_id=1"    # app → backend → database
 ```
 
 ### Step 7: Stop and clean up
@@ -158,7 +159,7 @@ docker compose down
 | Piece    | Open in browser / curl        | Notes                                   |
 | -------- | ----------------------------- | --------------------------------------- |
 | Frontend | http://localhost              | the app; forwards `/api` to the backend |
-| Backend  | http://localhost:5000/health  | the Go API (the app uses it via `/api`) |
+| Backend  | http://localhost:5001/health  | the Go API (the app uses it via `/api`) |
 | Postgres | localhost:5432                | user / password: `devboard` / `devboard`|
 
 ---
