@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: irfan
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: devboard
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U irfan -d devboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devboard-net
+
+  backend:
+    build: ./backend
+    container_name: backend
+    environment:
+      - PORT=5000
+      - POSTGRES_URL=postgres://irfan:password@postgres:5432/devboard?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # Pings the backend health endpoint using wget or curl inside the backend container
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s # Gives the backend a short grace period to boot up
+    networks:
+      - devboard-net
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy # Ensures frontend waits until backend health check passes
+    networks:
+      - devboard-net
+
+volumes:
+  postgres_data:
+
+networks:
+  devboard-net:
+    driver: bridge
